@@ -1,6 +1,9 @@
 package fr.theo.carnet;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.webkit.WebResourceRequest;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.WindowManager;
@@ -21,7 +24,20 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
-        web.setWebViewClient(new WebViewClient());
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest req) {
+                Uri u = req.getUrl();
+                String sch = u.getScheme();
+                if ("http".equals(sch) || "https".equals(sch)) {
+                    // Les tutos s'ouvrent dans YouTube ou le navigateur
+                    try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) {}
+                    return true;
+                }
+                return false;
+            }
+        });
+        s.setSupportMultipleWindows(false);
         web.setBackgroundColor(isDark() ? 0xFF121212 : 0xFFF4F3EF);
         setContentView(web);
         if (savedInstanceState != null) web.restoreState(savedInstanceState);
